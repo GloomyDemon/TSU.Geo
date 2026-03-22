@@ -1,4 +1,4 @@
-package com.example.tsugeo.ui.theme
+package university.hits.tsugeo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
