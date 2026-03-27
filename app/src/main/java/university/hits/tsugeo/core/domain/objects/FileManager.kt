@@ -1,11 +1,10 @@
-package university.hits.tsugeo.core.domain.classes
-
-import java.nio.charset.Charset
+package university.hits.tsugeo.core.domain.objects
 
 import android.content.Context
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.nio.charset.Charset
 
 object FileManager {
     fun getFile(

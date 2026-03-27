@@ -1,4 +1,4 @@
-package university.hits.tsugeo.core.domain.classes
+package university.hits.tsugeo.core.domain.objects
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
