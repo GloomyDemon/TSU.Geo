@@ -56,7 +56,7 @@ object FileManager {
         return FileInputStream(file).use { it.readBytes() }
     }
 
-    fun readTextInDir(
+    fun readText(
         context: Context,
         fileName: String,
         dirName: String = "",
