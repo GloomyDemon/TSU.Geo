@@ -1,10 +1,10 @@
 package university.hits.tsugeo.core.ui.components
 
+import androidx.compose.runtime.Composable
 import androidx.compose.material3.Button
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
