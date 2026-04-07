@@ -8,13 +8,13 @@ object MatrixManager {
         val rows = matrix.size
         val cols = matrix.firstOrNull()?.size ?: 0
 
-        if (matrix.any { it.size != cols }) {
-            throw IllegalArgumentException("Matrix must be rectangular")
+        require (matrix.all { it.size == cols }) {
+            "Matrix must be rectangular"
         }
 
         val totalBits = rows.toLong() * cols.toLong()
-        if (totalBits > Int.MAX_VALUE.toLong()) {
-            throw IllegalArgumentException("Matrix too large: $rows × $cols")
+        require (totalBits <= Int.MAX_VALUE.toLong()) {
+            "Matrix too large: $rows × $cols"
         }
 
         val bytesNeeded = ((totalBits + 7) / 8).toInt()
@@ -50,29 +50,26 @@ object MatrixManager {
 
     fun decode(data: ByteArray): Array<BooleanArray> {
         val buffer = ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN)
-        if (buffer.remaining() < 8) {
-            throw IllegalArgumentException("Matrix data is too short to contain rows and cols")
+        require(buffer.remaining() >= 8) {
+            "Matrix data is too short to contain rows and cols"
         }
 
         val rows = buffer.getInt()
         val cols = buffer.getInt()
 
-        if (rows < 0 || cols < 0) {
-            throw IllegalArgumentException("Rows / cols negative: $rows × $cols")
+        require(rows >= 0 && cols >= 0) {
+            "Rows / cols negative: $rows × $cols"
         }
 
         val totalBits = rows.toLong() * cols.toLong()
-        if (totalBits > Int.MAX_VALUE.toLong()) {
-            throw IllegalArgumentException("Matrix too large: $rows × $cols")
+        require(totalBits <= Int.MAX_VALUE.toLong()) {
+            "Matrix too large: $rows × $cols"
         }
-
         val expectedBytes = ((totalBits + 7) / 8).toInt()
         val actualBytes = buffer.remaining()
 
-        if (actualBytes != expectedBytes) {
-            throw IllegalArgumentException(
-                "Matrix size mismatch: expected $expectedBytes payload bytes, got $actualBytes"
-            )
+        require(actualBytes == expectedBytes) {
+            "Matrix size mismatch: expected $expectedBytes payload bytes, got $actualBytes"
         }
 
         val matrix = Array(rows) { BooleanArray(cols) }

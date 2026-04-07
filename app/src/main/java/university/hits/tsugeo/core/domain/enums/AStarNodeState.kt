@@ -4,6 +4,7 @@ enum class AStarNodeState {
     Unchecked,
     Waiting,
     Checked,
+    Path,
     Start,
     End
 }

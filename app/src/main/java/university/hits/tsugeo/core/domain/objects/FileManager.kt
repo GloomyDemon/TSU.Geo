@@ -50,10 +50,34 @@ object FileManager {
         dirName: String = ""
     ): ByteArray {
         val file = getFile(context, fileName, dirName)
-        if (!file.exists()) {
-            throw IllegalArgumentException("File does not exist: ${file.absolutePath}")
+        require(file.exists()) {
+            "File does not exist: ${file.absolutePath}"
         }
         return FileInputStream(file).use { it.readBytes() }
+    }
+
+    fun readRawBytes(
+        context: Context,
+        fileName: String
+    ): ByteArray {
+        return context.resources.openRawResource(
+            context.resources.getIdentifier(
+                fileName,
+                "raw",
+                context.packageName
+            )
+        ).use { it.readBytes() }
+    }
+
+    fun readRawText(
+        context: Context,
+        fileName: String,
+        charset: Charset = Charsets.UTF_8
+    ): String {
+        return readRawBytes(
+            context,
+            fileName
+        ).toString(charset)
     }
 
     fun readText(
