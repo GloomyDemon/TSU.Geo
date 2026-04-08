@@ -8,9 +8,7 @@ import university.hits.tsugeo.core.domain.interfaces.node.IMatrixNode
 import university.hits.tsugeo.core.domain.interfaces.node.INodeFactory
 
 class AStarNode(
-    isAvailable: Boolean,
-    override var g: Float = 0f,
-    override var h: Float = 0f
+    isAvailable: Boolean
 ) : BaseNode(isAvailable), IAStarNode, IMatrixNode {
 
     companion object : INodeFactory<AStarNode> {
@@ -18,14 +16,16 @@ class AStarNode(
             AStarNode(isAvailable)
     }
 
+    override var axis: Vector2 = Vector2(0, 0)
+
+    override var g: Float = Float.POSITIVE_INFINITY
+
+    override var h: Float = 0f
+
     override val f: Float
         get() = g + h
 
     override var previous: IBaseNode? = null
 
     override var status: AStarNodeState = AStarNodeState.Unchecked
-
-    override var axis: Vector2 = Vector2(0, 0)
-
-    override var neighbourByDirection: Map<Direction, IBaseNode?> = emptyMap()
 }
