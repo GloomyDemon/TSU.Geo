@@ -1,7 +1,6 @@
 package university.hits.tsugeo.core.domain.classes
 
 import university.hits.tsugeo.core.domain.enums.AStarNodeState
-import university.hits.tsugeo.core.domain.enums.Direction
 import university.hits.tsugeo.core.domain.interfaces.node.IAStarNode
 import university.hits.tsugeo.core.domain.interfaces.node.IBaseNode
 import university.hits.tsugeo.core.domain.interfaces.node.IMatrixNode
