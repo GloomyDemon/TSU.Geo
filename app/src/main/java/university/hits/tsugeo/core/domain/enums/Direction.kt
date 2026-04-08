@@ -1,10 +1,10 @@
 package university.hits.tsugeo.core.domain.enums
 
-enum class Direction(val dx: Int, val dy: Int) {
-    Up(0, 1),
-    Down(0, -1),
-    Left(-1, 0),
-    Right(1, 0);
+import university.hits.tsugeo.core.domain.classes.Vector2
 
-    fun translate(x: Int, y: Int): Pair<Int, Int> = x + dx to y + dy
+enum class Direction(val vec: Vector2) {
+    Up(Vector2(0,-1)),
+    Down(Vector2(0, 1)),
+    Left(Vector2(-1, 0)),
+    Right(Vector2(1, 0));
 }

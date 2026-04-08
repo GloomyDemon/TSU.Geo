@@ -1,9 +1,7 @@
 package university.hits.tsugeo.core.domain.interfaces.node
 
-import university.hits.tsugeo.core.domain.enums.Direction
+import university.hits.tsugeo.core.domain.classes.Vector2
 
-interface IMatrixNode: IConnectableNode {
-    val x: Int
-    val y: Int
-    val neighbourByDirection: Map<Direction, IBaseNode?>
+interface IMatrixNode: IBaseNode {
+    var axis: Vector2
 }
