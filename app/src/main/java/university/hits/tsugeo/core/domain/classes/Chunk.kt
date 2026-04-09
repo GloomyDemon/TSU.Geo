@@ -2,6 +2,7 @@ package university.hits.tsugeo.core.domain.classes
 
 import android.content.Context
 import university.hits.tsugeo.core.domain.interfaces.node.IBaseNode
+import university.hits.tsugeo.core.domain.interfaces.node.IMatrixNode
 import university.hits.tsugeo.core.domain.objects.FileManager
 import university.hits.tsugeo.core.domain.objects.MatrixManager
 
@@ -36,7 +37,11 @@ class Chunk<T : IBaseNode>(
 
         data = List(size.x) { i ->
             List(size.y) { j ->
-                factory(paths[i][j])
+                val node = factory(paths[i][j])
+                if (node is IMatrixNode) {
+                    node.axis = Vector2(i, j)
+                }
+                node
             }
         }
     }

@@ -2,18 +2,23 @@ package university.hits.tsugeo.core.domain.classes
 
 import university.hits.tsugeo.core.domain.enums.AStarNodeState
 import university.hits.tsugeo.core.domain.enums.Direction
-import university.hits.tsugeo.core.domain.interfaces.node.IAStarNode
-import university.hits.tsugeo.core.domain.interfaces.node.IMatrixNode
+import university.hits.tsugeo.core.domain.interfaces.node.IBaseNode
 import kotlin.math.abs
 
 class AStarPathfinder(
-    private val map: MapMatrix<AStarNode>
+    private val map: MapMatrix<IBaseNode>
 ) {
+    private val state = HashMap<Vector2, AStarSearchState>()
+
+    private fun getState(pos: Vector2): AStarSearchState =
+        state.getOrPut(pos) { AStarSearchState() }
     private data class OpenEntry(
         val pos: Vector2,
-        val f: Float,
+        val g: Float,
         val h: Float
-    )
+    ) {
+        val f: Float get() = g + h
+    }
 
     fun findPath(start: Vector2, goal: Vector2): List<Vector2> {
         for (step in findPathWithSteps(start, goal)) {
@@ -41,35 +46,38 @@ class AStarPathfinder(
 
         val open = createOpenQueue()
 
-        val startNode = map.getNode(start)
-        startNode.g = 0f
-        startNode.h = heuristic(start, goal)
-        startNode.status = AStarNodeState.Start
+        val startState = getState(start)
+        startState.g = 0f
+        startState.h = heuristic(start, goal)
+        startState.status = AStarNodeState.Start
+
         open.add(
             OpenEntry(
                 start,
-                startNode.f,
-                startNode.h
+                startState.g,
+                startState.h
             )
         )
 
         while (open.isNotEmpty()) {
             val currentEntry = open.poll()!!
             val currentPos = currentEntry.pos
-            val currentNode = map.getNode(currentPos)
+            val currentState = getState(currentPos)
 
-            if (currentNode.status == AStarNodeState.Checked) continue
+            if (currentState.status == AStarNodeState.Checked) continue
+
+            if (!isEntryActual(currentEntry)) continue
 
             val openedOnStep = mutableListOf<Vector2>()
             val updatedOnStep = mutableListOf<Vector2>()
             val closedOnStep = mutableListOf<Vector2>()
 
-            currentNode.status = AStarNodeState.Checked
+            currentState.status = AStarNodeState.Checked
             closedOnStep.add(currentPos)
 
             if (currentPos == goal) {
-                val goalNode = map.getNode(goal)
-                goalNode.status = AStarNodeState.End
+                val goalState = getState(goal)
+                goalState.status = AStarNodeState.End
                 val path = reconstructPath(goal)
 
                 yield(
@@ -87,20 +95,20 @@ class AStarPathfinder(
             for (nextPos in neighbours(currentPos)) {
                 if (!map.isAvailableForPath(nextPos)) continue
 
-                val nextNode = map.getNode(nextPos)
-                val tentativeG = currentNode.g + cost(currentPos, nextPos)
+                val nextState = getState(nextPos)
+                val tentativeG = currentState.g + 1f
 
-                if (tentativeG < nextNode.g) {
-                    val wasUnchecked = nextNode.status == AStarNodeState.Unchecked
-                    val wasWaiting = nextNode.status == AStarNodeState.Waiting
+                if (tentativeG < nextState.g) {
+                    val wasUnchecked = nextState.status == AStarNodeState.Unchecked
+                    val wasWaiting = nextState.status == AStarNodeState.Waiting
 
-                    nextNode.previous = currentNode
-                    nextNode.g = tentativeG
-                    nextNode.h = heuristic(nextPos, goal)
+                    nextState.previous = currentPos
+                    nextState.g = tentativeG
+                    nextState.h = heuristic(nextPos, goal)
 
                     when {
                         wasUnchecked -> {
-                            nextNode.status = AStarNodeState.Waiting
+                            nextState.status = AStarNodeState.Waiting
                             openedOnStep.add(nextPos)
                         }
                         wasWaiting -> {
@@ -108,7 +116,7 @@ class AStarPathfinder(
                         }
                     }
 
-                    open.add(OpenEntry(nextPos, nextNode.f, nextNode.h))
+                    open.add(OpenEntry(nextPos, nextState.g, nextState.h))
                 }
             }
 
@@ -135,12 +143,7 @@ class AStarPathfinder(
     }
 
     private fun resetAll() {
-        map.forEachLoadedNode { node ->
-            node.g = Float.POSITIVE_INFINITY
-            node.h = 0f
-            node.previous = null
-            node.status = AStarNodeState.Unchecked
-        }
+        state.clear()
     }
 
     private fun createOpenQueue() = java.util.PriorityQueue<OpenEntry> { a, b ->
@@ -152,30 +155,35 @@ class AStarPathfinder(
         return (abs(a.x - b.x) + abs(a.y - b.y)).toFloat()
     }
 
-    private fun cost(from: Vector2, to: Vector2): Float = 1f
-
     private fun neighbours(pos: Vector2): Sequence<Vector2> = sequence {
         for (dir in Direction.entries) {
             yield(Vector2(pos.x + dir.vec.x, pos.y + dir.vec.y))
         }
     }
 
+    private fun sameFloat(a: Float, b: Float): Boolean =
+        abs(a - b) < 1e-6f
+
+    private fun isEntryActual(entry: OpenEntry): Boolean {
+        val nodeState = getState(entry.pos)
+        return sameFloat(entry.g, nodeState.g)
+    }
+
     private fun reconstructPath(goal: Vector2): List<Vector2> {
         val path = mutableListOf<Vector2>()
+        var current: Vector2? = goal
 
-        var currentNode: IAStarNode? = map.getNode(goal)
-        while (currentNode != null) {
-            val matrixNode = currentNode as? IMatrixNode ?: break
-            path.add(matrixNode.axis)
-            currentNode = currentNode.previous as? IAStarNode
+        while (current != null) {
+            path.add(current)
+            current = getState(current).previous
         }
 
         path.reverse()
 
         for (pos in path) {
-            val node = map.getNode(pos)
-            if (node.status != AStarNodeState.Start && node.status != AStarNodeState.End) {
-                node.status = AStarNodeState.Path
+            val s = getState(pos)
+            if (s.status != AStarNodeState.Start && s.status != AStarNodeState.End) {
+                s.status = AStarNodeState.Path
             }
         }
 

@@ -2,7 +2,6 @@ package university.hits.tsugeo.core.domain.classes
 
 import android.content.Context
 import university.hits.tsugeo.core.domain.interfaces.node.IBaseNode
-import university.hits.tsugeo.core.domain.interfaces.node.IMatrixNode
 
 class MapMatrix<T : IBaseNode>(
     private val context: Context,
@@ -63,15 +62,7 @@ class MapMatrix<T : IBaseNode>(
     fun getNode(global: Vector2): T {
         val chunkAxis = getChunkAxis(global)
         val localAxis = getLocalAxis(global)
-        val node = this[chunkAxis][localAxis]
-
-        if (node is IMatrixNode) {
-            if (node.axis != global) {
-                node.axis = global
-            }
-        }
-
-        return node
+        return this[chunkAxis][localAxis]
     }
 
     operator fun get(axis: Vector2): Chunk<T> {
