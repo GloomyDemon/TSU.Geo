@@ -15,12 +15,12 @@ class MapMatrix<T : IBaseNode>(
 
     private val modified = HashSet<Vector2>()
 
-    fun pin(axis: Vector2) {
-        pinnedChunks.add(axis)
+    fun pin(axis: Vector2): Boolean {
+        return pinnedChunks.add(axis)
     }
 
-    fun unpin(axis: Vector2) {
-        pinnedChunks.remove(axis)
+    fun unpin(axis: Vector2): Boolean {
+        return pinnedChunks.remove(axis)
     }
 
     fun clearPins() {
